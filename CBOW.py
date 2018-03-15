@@ -1,8 +1,13 @@
 from torch.utils.data import Dataset, DataLoader
 import torch
 import torch.nn as nn
+from torch.autograd import Variable
 import re
 import io
+
+
+EMDEDDING_DIM = 1000
+CONTEXT = 2
 
 def clean_str(string):
     string = re.sub(r"[^A-Za-z0-9(),!?\'\`]", " ", string)
@@ -67,6 +72,7 @@ class TwitterData(Dataset):
         self.x_data = X
         self.y_data = y_pred
         self.len = len(self.x_data)
+        self.vocab_size = len(word2idx)
 
     def __getitem__(self, index):
         return self.x_data[index], self.y_data[index]
@@ -75,10 +81,35 @@ class TwitterData(Dataset):
         return self.len
 
 
-twitterData = TwitterData("twitter-sentiment.cvs",2)
+twitterData = TwitterData("twitter-sentiment.cvs",CONTEXT)
 
 train_loader = DataLoader(dataset=twitterData, batch_size=15, shuffle=True)
 
 
+class CBOW(torch.nn.Module):
+
+    def __init__(self, vocab_size, embedding_dim):
+        super(CBOW,self).__init__()
+        self.embeddings = nn.Embedding(vocab_size, embedding_dim)
+        self.linear1 = nn.Linear(embedding_dim,128)
+        self.af1 = nn.ReLU()
+        self.linear2 = nn.Linear(128, vocab_size)
+        self.af2 = nn.LogSoftmax()
 
 
+    def forward(self, input):
+        embeds = sum(self.embeddings(input)).view(1, -1)
+        out = self.linear1(embeds)
+        out = self.af11(out)
+        out = self.linear2(out)
+        out = self.af2(out)
+        return out
+
+    def get_word_emdedding(self, word):
+        return
+
+
+model = CBOW(twitterData.vocab_size, EMDEDDING_DIM)
+
+loss_function = nn.NLLLoss()
+optimizer = torch.optim.SGD(model.parameters(), lr=0.001)
