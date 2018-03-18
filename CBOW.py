@@ -5,11 +5,12 @@ from loader import word2idx
 
 
 EMDEDDING_DIM = 1000
+LEARNING_RATE = 0.001
 
 class CBOW(torch.nn.Module):
 
     def __init__(self, vocab_size, embedding_dim):
-        super(CBOW,self).__init__()
+        super(CBOW, self).__init__()
         self.embeddings = nn.Embedding(vocab_size, embedding_dim)
         self.linear1 = nn.Linear(embedding_dim, 128)
         self.af1 = nn.ReLU()
@@ -31,7 +32,7 @@ class CBOW(torch.nn.Module):
 
 model = CBOW(len(word2idx), EMDEDDING_DIM)
 loss_function = nn.NLLLoss()
-optimizer = torch.optim.SGD(model.parameters(), lr=0.001)
+optimizer = torch.optim.SGD(model.parameters(), lr=LEARNING_RATE)
 
 
 
