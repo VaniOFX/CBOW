@@ -1,5 +1,5 @@
-from SentimentClasifierNN import model, optimizer, loss_function
-from loaderClasifier import train_loader
+from NNClasifier.SentimentClasifierNN import model, optimizer, loss_function
+from NNClasifier.loaderClasifier import train_loader
 from torch.autograd import Variable
 
 

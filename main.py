@@ -20,22 +20,25 @@ def train():
     for epoch in range(1, EPOCH+1):
         model.train()
         for batch_idx, (data, target) in enumerate(train_loader):
-            data, target = Variable(data), Variable(target)
+            data, target = Variable(data).cuda(), Variable(torch.LongTensor([sum(target)])).cuda()
             optimizer.zero_grad()
             output = model(data)
             loss = loss_function(output, target)
             loss.backward()
             optimizer.step()
             if batch_idx % 30 == 0:
-                loss_data.append(loss.data[0])
+                print("the loss is ", loss.data)
+                loss_data.append(loss.data)
                 iterations.append(epoch * batch_idx)
 
 
+
+
+
+train()
 plt.plot(iterations, loss_data)
 plt.xlabel('Iterations')
 plt.ylabel('Loss')
 plt.show()
-
-
-word_emb_mat = model.embeddings.weight.numpy()
-np.savetxt("word_emb_mat.txt", word_emb_mat)
+#word_emb_mat = model.embeddings.weight.numpy()
+#np.savetxt("word_emb_mat.txt", word_emb_mat)

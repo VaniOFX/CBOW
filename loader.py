@@ -1,8 +1,9 @@
 from cleanData import clean_str
 import io
 from torch.utils.data import Dataset, DataLoader
+import torch
 
-bsz = 15
+bsz = 1
 CONTEXT = 2
 
 word2idx = {'padding': 0}
@@ -25,8 +26,8 @@ class TwitterData(Dataset):
                 self.addToDictionaries(index, wordsList)
                 self.extractContext(X, y_pred, wordsList)
 
-        self.x_data = X
-        self.y_data = y_pred
+        self.x_data = torch.LongTensor(X)
+        self.y_data = torch.LongTensor(y_pred)
         self.len = len(self.x_data)
 
     def extractContext(self, X, y_pred, wordsList):
@@ -53,6 +54,7 @@ class TwitterData(Dataset):
                 for j in range(1, CONTEXT + 1, 1):
                     temp_X.append(word2idx[wordsList[i + j]])
             X.append(temp_X)
+            #print("\n",temp_X,"\n",i)
             y_pred.append(i)
 
     def addToDictionaries(self, index, wordsList):
@@ -69,5 +71,5 @@ class TwitterData(Dataset):
         return self.len
 
 
-twitterData = TwitterData("twitter-sentiment.cvs")
+twitterData = TwitterData("twitter-sentiment.csv")
 train_loader = DataLoader(dataset=twitterData, batch_size=bsz, shuffle=True)

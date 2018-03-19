@@ -1,36 +1,40 @@
 import torch
 import torch.nn as nn
 from torch.autograd import Variable
-from loader import word2idx
+from loader import word2idx, CONTEXT
+import torch.nn.functional as F
 
 
-EMDEDDING_DIM = 1000
-LEARNING_RATE = 0.001
+
+EMDEDDING_DIM = 100
+LEARNING_RATE = 0.00003
 
 class CBOW(torch.nn.Module):
 
-    def __init__(self, vocab_size, embedding_dim):
+    def __init__(self, vocab_size, embedding_dim, context):
         super(CBOW, self).__init__()
+        # self.embeddings = nn.Embedding(vocab_size, embedding_dim)
+        # self.lin1 = nn.Linear(embedding_dim * context * 2, 128)
+        # self.lin2 = nn.Linear(128, vocab_size)
         self.embeddings = nn.Embedding(vocab_size, embedding_dim)
-        self.linear1 = nn.Linear(embedding_dim, 128)
-        self.af1 = nn.ReLU()
-        self.linear2 = nn.Linear(128, vocab_size)
-        self.af2 = nn.LogSoftmax()
+        self.lin1 = nn.Linear(context * 2 * embedding_dim, 512)
+        self.lin2 = nn.Linear(512, vocab_size)
 
-    def forward(self, input):
-        embeds = sum(self.embeddings(input)).view(1, -1)
-        out = self.linear1(embeds)
-        out = self.af11(out)
-        out = self.linear2(out)
-        out = self.af2(out)
+    def forward(self, inp):
+        out = sum(self.embeddings(inp))
+        out = out.view(1, -1)
+        out = self.lin1(out)
+        out = F.relu(out)
+        out = self.lin2(out)
+        out = F.log_softmax(out, dim=1)
         return out
 
-    def get_word_emdedding(self, word):
-        word = Variable(torch.Tensor([word2idx[word]]))
+    def get_word_embedding(self, word):
+        word = Variable(torch.LongTensor([word2idx[word]]))
         return self.embeddings(word).view(1, -1)
 
 
-model = CBOW(len(word2idx), EMDEDDING_DIM)
+model = CBOW(len(word2idx), EMDEDDING_DIM, CONTEXT).cuda()
 loss_function = nn.NLLLoss()
 optimizer = torch.optim.SGD(model.parameters(), lr=LEARNING_RATE)
 
