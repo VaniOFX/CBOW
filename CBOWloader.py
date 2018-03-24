@@ -3,7 +3,7 @@ import io
 from torch.utils.data import Dataset, DataLoader
 import torch
 
-bsz = 1
+bsz = 32
 CONTEXT = 2
 
 word2idx = {'padding': 0}
@@ -23,16 +23,17 @@ class TwitterData(Dataset):
                 _, _, sentence = line.split('\t')
                 sentence = clean_str(sentence)
                 wordsList = sentence.split()
-                self.addToDictionaries(index, wordsList)
-                self.extractContext(X, y_pred, wordsList)
+                index = self._addToDictionaries(index, wordsList)
+                self._extractContext(X, y_pred, wordsList)
 
         self.x_data = torch.LongTensor(X)
         self.y_data = torch.LongTensor(y_pred)
         self.len = len(self.x_data)
 
-    def extractContext(self, X, y_pred, wordsList):
+    def _extractContext(self, X, y_pred, wordsList):
         for i in range(len(wordsList)):
             temp_X = []
+
             if i - CONTEXT < 0:
                 pad_count = CONTEXT - i
                 for j in range(pad_count):
@@ -43,26 +44,27 @@ class TwitterData(Dataset):
                 for j in range(CONTEXT, 0, -1):
                     temp_X.append(word2idx[wordsList[i - j]])
 
+
             if i + CONTEXT > len(wordsList) - 1:
                 pad_count = i + CONTEXT - len(wordsList) + 1
                 for j in range(1, CONTEXT - pad_count + 1):
                     temp_X.append(word2idx[wordsList[i + j]])
                 for j in range(pad_count):
                     temp_X.append(word2idx['padding'])
-
             else:
                 for j in range(1, CONTEXT + 1, 1):
                     temp_X.append(word2idx[wordsList[i + j]])
-            X.append(temp_X)
-            #print("\n",temp_X,"\n",i)
-            y_pred.append(i)
 
-    def addToDictionaries(self, index, wordsList):
+            X.append(temp_X)
+            y_pred.append(word2idx[wordsList[i]])
+
+    def _addToDictionaries(self, index, wordsList):
         for word in wordsList:
             if word not in word2idx:
                 word2idx[word] = index
                 idx2word[index] = word
                 index += 1
+        return index
 
     def __getitem__(self, index):
         return self.x_data[index], self.y_data[index]
@@ -73,3 +75,4 @@ class TwitterData(Dataset):
 
 twitterData = TwitterData("twitter-sentiment.csv")
 train_loader = DataLoader(dataset=twitterData, batch_size=bsz, shuffle=True)
+
