@@ -13,9 +13,9 @@ print('Accuracy of logistic regression classifier on test set: {:.2f}'.format(lo
 data, target = prepare_data("twitter-sentiment-testset.csv")
 y_pred = logisticRegr.predict(data)
 f_pred = open("myPrediction.csv", 'w')
-f_pred.write('ID\tSentiment')
+f_pred.write('ID\tSentiment\n')
 ID = 1
-for pred in y_pred[0]:
+for pred in y_pred:
     sentiment_pred = 'pos' if pred == 1 else 'neg'
     f_pred.write(str(ID)+','+sentiment_pred+'\n')
     ID += 1

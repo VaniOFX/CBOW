@@ -3,7 +3,7 @@ import io
 from torch.utils.data import Dataset, DataLoader
 import torch
 
-bsz = 32
+bsz = 128
 CONTEXT = 2
 
 word2idx = {'padding': 0}
@@ -75,4 +75,5 @@ class TwitterData(Dataset):
 
 twitterData = TwitterData("twitter-sentiment.csv")
 train_loader = DataLoader(dataset=twitterData, batch_size=bsz, shuffle=True)
+
 

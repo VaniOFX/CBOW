@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import time
 
 
-EPOCH = 1
+EPOCH = 6
 
 
 def get_similarity(w1, w2, mod):
@@ -27,9 +27,10 @@ def train():
             loss = loss_function(output, target)
             loss.backward()
             optimizer.step()
-            if batch_idx % 100 == 0:
+            if batch_idx % 50 == 0:
                 iteration = iteration + 1
-                print("the loss is ", loss.data[0])
+                if batch_idx % 30 == 0:
+                    print("the loss is ", loss.data[0])
                 loss_data.append(loss.data)
                 iterations.append(iteration)
 
@@ -39,13 +40,18 @@ if __name__ == "__main__":
     loss_data = []
     iterations = []
     train()
+    print("--- %s seconds ---" % (time.time() - start_time))
     plt.plot(iterations, loss_data)
     plt.xlabel('Iterations')
     plt.ylabel('Loss')
     plt.show()
-    print("--- %s seconds ---" % (time.time() - start_time))
-    word_emb_mat = model.embeddings.weight.numpy()
-    print("The embedding matrix is")
-    print(word_emb_mat)
+    word_emb_mat = model.embeddings.cpu().weight.data.numpy()
     print("Saving...")
     np.savetxt("word_emb_mat.txt", word_emb_mat)
+    print(get_similarity('i', 'you', model))
+    print(get_similarity('he', 'she', model))
+    print(get_similarity('try', 'trying', model))
+    print(get_similarity('sister', 'brother', model))
+    print(get_similarity('happy', 'sad', model))
+    print(get_similarity('happy', 'fun', model))
+    print(get_similarity('her', 'him', model))
