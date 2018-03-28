@@ -15,13 +15,12 @@ class CBOW(torch.nn.Module):
     def __init__(self, vocab_size, embedding_dim):
         super(CBOW, self).__init__()
         self.embeddings = nn.Embedding(vocab_size, embedding_dim)
-        self.lin1 = nn.Linear(embedding_dim * 4, vocab_size)
+        self.lin1 = nn.Linear(embedding_dim, vocab_size)
         # self.lin2 = nn.Linear(256, vocab_size)
 
     def forward(self, inp):
         out = self.embeddings(inp)
-        out = out.view(128, 400)
-        # out = torch.sum(out, dim=1)
+        out = torch.sum(out, dim=1)
         # print("raw input {}\nafter summing {}\n".format(inp.size(), out.size()))
         out = self.lin1(out)
         # out = F.relu(out)
